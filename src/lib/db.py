@@ -2,10 +2,12 @@ import os
 
 import psycopg
 
+from lib import env_vars
+
 
 def execute_db_query(query, params=None):
     # Connect to your PostgreSQL database using psycopg (psycopg3)
-    conn = psycopg.connect(os.getenv('DATABASE_URL'))
+    conn = psycopg.connect(env_vars.env_vars.DATABASE_URL)
 
     cursor = conn.cursor()
 
