@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel
@@ -12,6 +13,14 @@ from lib.utils import delete_website, get_vector_store, save_website
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 
 @app.get("/")
