@@ -33,13 +33,14 @@ def delete_website_endpoint(body: SaveWebsiteBody):
 
 
 class SaveTextBody(BaseModel):
+    collection_name: str
     content: str
     source: str
 
 
 @app.post("/save_text")
 async def save_text_endpoint(body: SaveTextBody):
-    vector_store = get_vector_store("rahul portfolio website")
+    vector_store = get_vector_store(body.collection_name)
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=250, chunk_overlap=0
     )
@@ -50,17 +51,33 @@ async def save_text_endpoint(body: SaveTextBody):
 
 
 class DeleteTextBody(BaseModel):
+    collection_name: str
     source: str
 
 
 @app.post("/delete_text")
 async def delete_text_endpoint(body: DeleteTextBody):
     delete_query = """
-    DELETE FROM langchain_pg_embedding
-    WHERE cmetadata->>'source' = %s;
+        DELETE FROM langchain_pg_embedding
+WHERE cmetadata->>'source' = %s
+  AND collection_id IN (
+      SELECT uuid
+      FROM langchain_pg_collection
+      WHERE name = %s
+  );
     """
-    execute_db_query(delete_query, (body.source,))
+    execute_db_query(delete_query, (body.source, body.collection_name))
 
     return {
         'message': 'deletion successful'
     }
+
+
+@app.get("/relevant_docs")
+async def get_relevant_docs(collection_name: str, query: str, num_docs=5):
+    vector_store = get_vector_store(collection_name)
+    retriever = vector_store.as_retriever(
+        search_type="similarity", search_kwargs={"k": num_docs}
+    )
+    retrieved_docs = retriever.invoke(query)
+    return retrieved_docs
