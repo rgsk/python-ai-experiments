@@ -1,0 +1,1 @@
+docker logs python-ai-experiments --follow

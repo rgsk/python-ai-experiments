@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
-from .routers.root_router import router as root_router
+from routers.root_router import router as root_router
 
 load_dotenv()
 

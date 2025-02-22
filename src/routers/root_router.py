@@ -8,9 +8,7 @@ from pydantic import BaseModel
 from lib.db import execute_db_query
 from lib.utils import get_vector_store
 
-router = APIRouter(
-    prefix="/",
-)
+router = APIRouter()
 
 
 @router.get("/")
