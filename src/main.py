@@ -90,7 +90,8 @@ async def get_relevant_docs(collection_name: str, query: str, sources: List[str]
     retriever = vector_store.as_retriever(
         search_type="similarity", search_kwargs={
             "k": num_docs,
-            'filter': {'source': {'$in': sources}}} if len(sources) > 0 else {"k": num_docs}
+            'filter': {'source': {'$in': sources}} if len(sources) > 0 else {},
+        }
     )
     retrieved_docs = retriever.invoke(query, )
     return retrieved_docs
