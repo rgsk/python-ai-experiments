@@ -1,4 +1,4 @@
-sh ./scripts/restart-postgres.sh
+sh scripts/restart_postgres.sh
 
 sed -i '' 's/localhost/host.docker.internal/g' .env
 

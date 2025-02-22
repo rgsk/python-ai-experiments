@@ -1,1 +1,1 @@
-fastapi src/main.py
+fastapi run src/main.py

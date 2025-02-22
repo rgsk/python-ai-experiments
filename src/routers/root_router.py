@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def root():
+async def hello_server():
     return {
         'message': 'Server is running'
     }
@@ -25,7 +25,7 @@ class SaveTextBody(BaseModel):
 
 
 @router.post("/save_text")
-async def save_text_endpoint(body: SaveTextBody):
+async def save_text(body: SaveTextBody):
     vector_store = get_vector_store(body.collection_name)
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=250, chunk_overlap=0
@@ -42,7 +42,7 @@ class DeleteTextBody(BaseModel):
 
 
 @router.post("/delete_text")
-async def delete_text_endpoint(body: DeleteTextBody):
+async def delete_text(body: DeleteTextBody):
     delete_query = """
         DELETE FROM langchain_pg_embedding
 WHERE cmetadata->>'source' = %s
