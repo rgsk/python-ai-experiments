@@ -1,5 +1,7 @@
+from typing import List, Optional
+
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel
@@ -74,10 +76,12 @@ WHERE cmetadata->>'source' = %s
 
 
 @app.get("/relevant_docs")
-async def get_relevant_docs(collection_name: str, query: str, num_docs=5):
+async def get_relevant_docs(collection_name: str, query: str, sources: List[str] = Query([]), num_docs=5):
     vector_store = get_vector_store(collection_name)
     retriever = vector_store.as_retriever(
-        search_type="similarity", search_kwargs={"k": num_docs}
+        search_type="similarity", search_kwargs={
+            "k": num_docs,
+            'filter': {'source': {'$in': sources}}} if len(sources) > 0 else {"k": num_docs}
     )
-    retrieved_docs = retriever.invoke(query)
+    retrieved_docs = retriever.invoke(query, )
     return retrieved_docs
