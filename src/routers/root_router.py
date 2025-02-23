@@ -30,8 +30,9 @@ async def save_text(body: SaveTextBody):
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=250, chunk_overlap=0
     )
+    cleaned_content = body.content.replace("\x00", "\uFFFD")
     doc_splits = text_splitter.split_documents(
-        [Document(page_content=body.content, metadata={'source': body.source})])
+        [Document(page_content=cleaned_content, metadata={'source': body.source})])
     ids = vector_store.add_documents(doc_splits)
     return ids
 
