@@ -37,6 +37,33 @@ async def save_text(body: SaveTextBody):
     return ids
 
 
+class DeleteCollectionBody(BaseModel):
+    collection_name: str
+
+
+@router.post("/delete_collection")
+async def delete_collection(body: DeleteCollectionBody):
+    delete_embeddings_query = """
+        DELETE FROM langchain_pg_embedding
+WHERE collection_id IN (
+      SELECT uuid
+      FROM langchain_pg_collection
+      WHERE name = %s
+  );
+    """
+    execute_db_query(delete_embeddings_query, (body.collection_name,))
+
+    delete_collection_query = """
+        DELETE FROM langchain_pg_collection
+        WHERE name = %s
+    """
+    execute_db_query(delete_collection_query, (body.collection_name, ))
+
+    return {
+        'message': 'deletion successful'
+    }
+
+
 class DeleteTextBody(BaseModel):
     collection_name: str
     source: str
