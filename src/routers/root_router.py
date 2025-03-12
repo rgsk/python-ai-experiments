@@ -146,7 +146,7 @@ def load_website(url: str) -> dict:
         return {
             "title": "Error",
             "description": "Error loading description",
-            "og": {},
+            "og": None,
             "content": f"Error loading website: {e}",
         }
 
