@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 import requests  # type:ignore
 from bs4 import BeautifulSoup
@@ -102,12 +102,12 @@ async def get_relevant_docs(collection_name: str, query: str, sources: List[str]
     return retrieved_docs
 
 
-def load_website(url: str) -> str:
+def load_website(url: str) -> dict:
     """
-    Fetches the content of a website and returns its text content.
+    Fetches the content of a website and returns its title, description, content, and Open Graph image.
 
     :param url: The URL of the website to load.
-    :return: Extracted text content from the webpage.
+    :return: A dictionary with 'title', 'description', 'content', and 'og_image' keys.
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -117,10 +117,36 @@ def load_website(url: str) -> str:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        return soup.get_text(separator=' ', strip=True)
+        soup: Any = BeautifulSoup(response.text, 'html.parser')
+
+        title = soup.title.string.strip() if soup.title else "No Title Found"
+
+        # Extract description from meta tag
+        description = soup.find("meta", attrs={"name": "description"})
+        description = description["content"].strip(
+        ) if description and "content" in description.attrs else "No Description Found"
+
+        # Extract Open Graph image
+        og_image = soup.find("meta", property="og:image")
+        og_image = og_image["content"].strip(
+        ) if og_image and "content" in og_image.attrs else "No OG Image Found"
+
+        # Extract text content
+        content = soup.get_text(separator=' ', strip=True)
+
+        return {
+            "title": title,
+            "description": description,
+            "og_image": og_image,
+            "content": content
+        }
     except requests.exceptions.RequestException as e:
-        return f"Error loading website: {e}"
+        return {
+            "title": "Error",
+            "description": "Error loading description",
+            "content": f"Error loading website: {e}",
+            "og_image": "Error loading OG image"
+        }
 
 
 @router.get('/webpage-content')
