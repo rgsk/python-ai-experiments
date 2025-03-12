@@ -1,5 +1,7 @@
 from typing import List
 
+import requests  # type:ignore
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -98,3 +100,30 @@ async def get_relevant_docs(collection_name: str, query: str, sources: List[str]
     )
     retrieved_docs = retriever.invoke(query, )
     return retrieved_docs
+
+
+def load_website(url: str) -> str:
+    """
+    Fetches the content of a website and returns its text content.
+
+    :param url: The URL of the website to load.
+    :return: Extracted text content from the webpage.
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        return soup.get_text(separator=' ', strip=True)
+    except requests.exceptions.RequestException as e:
+        return f"Error loading website: {e}"
+
+
+@router.get('/webpage-content')
+async def get_webpage_content(url: str):
+    content = load_website(url)
+    return content
