@@ -104,10 +104,10 @@ async def get_relevant_docs(collection_name: str, query: str, sources: List[str]
 
 def load_website(url: str) -> dict:
     """
-    Fetches the content of a website and returns its title, description, content, and Open Graph image.
+    Fetches the content of a website and returns its title, description, content, and all Open Graph (OG) tags.
 
     :param url: The URL of the website to load.
-    :return: A dictionary with 'title', 'description', 'content', and 'og_image' keys.
+    :return: A dictionary with 'title', 'description', 'content', and an 'og' object containing all OG tags.
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -126,10 +126,12 @@ def load_website(url: str) -> dict:
         description = description["content"].strip(
         ) if description and "content" in description.attrs else "No Description Found"
 
-        # Extract Open Graph image
-        og_image = soup.find("meta", property="og:image")
-        og_image = og_image["content"].strip(
-        ) if og_image and "content" in og_image.attrs else "No OG Image Found"
+        # Extract all Open Graph tags
+        og_tags = {}
+        for meta in soup.find_all("meta"):
+            if meta.get("property", "").startswith("og:"):
+                og_tags[meta["property"].replace("og:", "")] = meta["content"].strip(
+                ) if "content" in meta.attrs else ""
 
         # Extract text content
         content = soup.get_text(separator=' ', strip=True)
@@ -137,19 +139,19 @@ def load_website(url: str) -> dict:
         return {
             "title": title,
             "description": description,
-            "og_image": og_image,
-            "content": content
+            "og": og_tags,
+            "content": content,
         }
     except requests.exceptions.RequestException as e:
         return {
             "title": "Error",
             "description": "Error loading description",
+            "og": {},
             "content": f"Error loading website: {e}",
-            "og_image": "Error loading OG image"
         }
 
 
 @router.get('/webpage-content')
 async def get_webpage_content(url: str):
-    content = load_website(url)
-    return content
+    result = load_website(url)
+    return result
