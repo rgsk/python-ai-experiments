@@ -1,4 +1,5 @@
 
+import cv2
 import torch
 from PIL import Image
 from torchvision import models, transforms
@@ -31,8 +32,7 @@ model.eval()
 # 4. Predict function
 
 
-def predict_image(image_path):
-    image = Image.open(image_path).convert("RGB")
+def predict_image(image):
     image_tensor = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
@@ -44,6 +44,36 @@ def predict_image(image_path):
 
 
 # ✅ Example usage:
-predicted_label = predict_image(
-    "test/battle-ram.png")
-print("Predicted Label:", predicted_label)
+# predicted_label = predict_image(
+
+#     Image.open("test/evo-valk.png").convert("RGB")
+# )
+# print("Predicted Label:", predicted_label)
+
+
+# Load the image
+img = cv2.imread("public/image-evo-only.png")
+
+# Crop parameters
+start_x = 41
+width = 238
+height = 450
+x_gap = 40
+
+# List to hold resized cropped images
+resized_cards = []
+
+# Extract and resize each card
+for y in [620, 1050]:
+    x = start_x
+    for i in range(4):
+        cropped = img[y:y + height, x:x + width]
+        cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
+        pil_img = Image.fromarray(cropped_rgb)
+
+        resized_cards.append(pil_img)
+
+        x += width + x_gap
+for image in resized_cards:
+    predicted_label = predict_image(image)
+    print("Predicted Label:", predicted_label)
