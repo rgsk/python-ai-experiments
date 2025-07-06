@@ -43,37 +43,38 @@ def predict_image(image):
     return label
 
 
-# ✅ Example usage:
-# predicted_label = predict_image(
+if __name__ == "__main__":
 
-#     Image.open("test/evo-valk.png").convert("RGB")
-# )
-# print("Predicted Label:", predicted_label)
+    # ✅ Example usage:
+    # predicted_label = predict_image(
 
+    #     Image.open("test/evo-valk.png").convert("RGB")
+    # )
+    # print("Predicted Label:", predicted_label)
 
-# Load the image
-img = cv2.imread("public/image-evo-only.png")
+    # Load the image
+    img = cv2.imread("public/image-evo-only.png")
 
-# Crop parameters
-start_x = 41
-width = 238
-height = 450
-x_gap = 40
+    # Crop parameters
+    start_x = 41
+    width = 238
+    height = 450
+    x_gap = 40
 
-# List to hold resized cropped images
-resized_cards = []
+    # List to hold resized cropped images
+    resized_cards = []
 
-# Extract and resize each card
-for y in [620, 1050]:
-    x = start_x
-    for i in range(4):
-        cropped = img[y:y + height, x:x + width]
-        cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(cropped_rgb)
+    # Extract and resize each card
+    for y in [620, 1050]:
+        x = start_x
+        for i in range(4):
+            cropped = img[y:y + height, x:x + width]
+            cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(cropped_rgb)
 
-        resized_cards.append(pil_img)
+            resized_cards.append(pil_img)
 
-        x += width + x_gap
-for image in resized_cards:
-    predicted_label = predict_image(image)
-    print("Predicted Label:", predicted_label)
+            x += width + x_gap
+    for image in resized_cards:
+        predicted_label = predict_image(image)
+        print("Predicted Label:", predicted_label)

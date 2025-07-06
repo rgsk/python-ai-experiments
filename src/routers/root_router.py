@@ -1,12 +1,16 @@
 from typing import Any, List
 
+import cv2
+import numpy as np
 import requests  # type:ignore
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from PIL import Image
 from pydantic import BaseModel
 
+from examples.predict import predict_image
 from lib.db import execute_db_query
 from lib.utils import get_vector_store
 
@@ -155,3 +159,42 @@ def load_website(url: str) -> dict:
 async def get_webpage_content(url: str):
     result = load_website(url)
     return result
+
+
+def read_image_from_url(url):
+    response = requests.get(url)
+    img_array = np.frombuffer(response.content, np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    return img
+
+
+@router.get('/clash-royale-cards')
+async def get_clash_royale_cards(url: str):
+    # Load the image
+    img = read_image_from_url(url)
+
+    # Crop parameters
+    start_x = 41
+    width = 238
+    height = 450
+    x_gap = 40
+
+    # List to hold resized cropped images
+    resized_cards = []
+
+    # Extract and resize each card
+    for y in [620, 1050]:
+        x = start_x
+        for i in range(4):
+            cropped = img[y:y + height, x:x + width]
+            cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(cropped_rgb)
+
+            resized_cards.append(pil_img)
+
+            x += width + x_gap
+    labels = []
+    for image in resized_cards:
+        predicted_label = predict_image(image)
+        labels.append(predicted_label)
+    return labels
