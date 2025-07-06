@@ -45,5 +45,5 @@ def predict_image(image_path):
 
 # ✅ Example usage:
 predicted_label = predict_image(
-    "test/image.png")
+    "test/battle-ram.png")
 print("Predicted Label:", predicted_label)
