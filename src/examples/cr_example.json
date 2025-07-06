@@ -1,0 +1,27 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an assistant that can identify cards in the deck of clash royale."
+    },
+    {
+      "role": "user",
+      "content": "identify the card?"
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://api-assets.clashroyale.com/cards/300/jAj1Q5rclXxU9kVImGqSJxa4wEMfEhvwNQ_4jiGUuqg.png"
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "Knight"
+    }
+  ]
+}
